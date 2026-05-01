@@ -163,12 +163,65 @@
 }
 
 /* ── 8. 侧边栏导航项文字 ─────────────────────────────────── */
-nav li .truncate {
-  /* 侧边栏也允许完整显示 */
-  white-space: nowrap !important;
-  text-overflow: ellipsis !important;
-  overflow: hidden !important;
-  max-width: 180px !important;         /* 限制最大宽度避免撑破 */
+/* 侧边栏容器：增加宽度 */
+nav.sidebar,
+#sidebar,
+aside[class*="sidebar"],
+[class*="sidebar"] {
+  min-width: 200px !important;
+  width: auto !important;
+  max-width: 280px !important;
+}
+
+/* 侧边栏导航项：允许完整显示 */
+nav li,
+nav li a,
+nav li span,
+nav li .truncate,
+#sidebar li,
+#sidebar li a,
+#sidebar li span,
+#sidebar li .truncate,
+[class*="sidebar"] li,
+[class*="sidebar"] li a,
+[class*="sidebar"] li span,
+[class*="sidebar"] li .truncate {
+  white-space: normal !important;
+  text-overflow: unset !important;
+  overflow: visible !important;
+  word-break: break-word !important;
+  line-height: 1.4 !important;
+  max-width: none !important;
+}
+
+/* 侧边栏导航项容器 */
+nav li a,
+#sidebar li a,
+[class*="sidebar"] li a {
+  display: flex !important;
+  align-items: flex-start !important;
+  padding: 8px 12px !important;
+  height: auto !important;
+  min-height: 40px !important;
+}
+
+/* 侧边栏图标 */
+nav li svg,
+nav li img,
+#sidebar li svg,
+#sidebar li img,
+[class*="sidebar"] li svg,
+[class*="sidebar"] li img {
+  flex-shrink: 0 !important;
+  margin-top: 2px !important;
+}
+
+/* 侧边栏文字区域 */
+nav li span:not(:has(svg)),
+#sidebar li span:not(:has(svg)),
+[class*="sidebar"] li span:not(:has(svg)) {
+  flex: 1 !important;
+  white-space: normal !important;
 }
 
 /* ── 9. Hover 效果增强 ───────────────────────────────────── */
