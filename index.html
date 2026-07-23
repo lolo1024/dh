@@ -524,20 +524,23 @@
 
     // --- 分隔符检测 ---
 
-    // 判断是否为分隔符（URL含 separator 或 title 全是横线/等号）
+    // 判断是否为分隔符：title 为纯横线 或 两端由横线框住的文字（如 "─────蓝奏云──────"）
     function isSeparator(link) {
-      if (!link.url && !link.title) return false;
-      if (link.url && link.url.includes('separator')) return true;
-      if (/^[─═━\-_=]{3,}$/.test(link.title)) return true;
+      var t = link.title || '';
+      if (!t) return false;
+      // 纯横线/等号（如 "────────"）
+      if (/^[─═━\-_=]{3,}$/.test(t)) return true;
+      // 两端有横线框住的文字（如 "─────蓝奏云──────"）
+      if (/^[─═━\-_=]+.+[─═━\-_=]+$/.test(t)) return true;
       return false;
     }
 
-    // 获取分隔符显示文字
-    function getSeparatorLabel(link) {
-      if (link.url && link.url.includes('separator')) {
-        return /^[─═━\-_=]+$/.test(link.title) ? '' : link.title;
-      }
-      return '';
+    // 获取分隔符显示文字：提取横线之间的纯文本，纯横线返回空
+    function getSeparatorLabel(title) {
+      if (!title) return '';
+      // 提取横线之间的文字
+      var m = title.match(/^[─═━\-_=]+(.+)[─═━\-_=]+$/);
+      return m ? m[1].trim() : '';
     }
 
     // Render bookmarks
@@ -571,54 +574,61 @@
 
       // 按分隔符分组渲染链接
       if (links.length > 0) {
-        // 按分隔符切分分组
+        // 按分隔符切分分组（分隔符关联到后面一组）
         const groups = [];
-        let currentGroup = [];
-        links.forEach(link => {
+        let currentGroup = { sepLabel: null, items: [] };
+        var hasSplit = false;
+
+        links.forEach(function(link) {
           if (isSeparator(link)) {
-            groups.push({ separator: link, items: currentGroup });
-            currentGroup = [];
+            hasSplit = true;
+            var label = getSeparatorLabel(link.title);
+            if (currentGroup.items.length > 0 || currentGroup.sepLabel) {
+              groups.push(currentGroup);
+            }
+            currentGroup = { sepLabel: label, items: [] };
           } else {
-            currentGroup.push(link);
+            currentGroup.items.push(link);
           }
         });
-        if (currentGroup.length > 0) {
-          groups.push({ separator: null, items: currentGroup });
-        }
+        groups.push(currentGroup);
 
         // 在文件夹区和第一组链接之间加分隔
         if (folders.length > 0) {
-          const hr = document.createElement('hr');
-          hr.className = 'col-span-full my-3 border-gray-200 dark:border-gray-600';
-          container.appendChild(hr);
+          var hr0 = document.createElement('hr');
+          hr0.className = 'my-3 border-gray-200 dark:border-gray-600';
+          container.appendChild(hr0);
         }
 
         // 渲染每个分组
-        groups.forEach((group, idx) => {
-          // 渲染分隔线（当有分隔符时）
-          if (group.separator) {
-            const label = getSeparatorLabel(group.separator);
-            const div = document.createElement('div');
-            div.className = 'col-span-full';
-            if (label) {
-              div.innerHTML = '<div class="flex items-center gap-3 my-3"><span class="flex-1 border-t border-gray-300 dark:border-gray-600"></span><span class="text-xs text-gray-400 dark:text-gray-500 font-medium whitespace-nowrap px-1">' + label + '</span><span class="flex-1 border-t border-gray-300 dark:border-gray-600"></span></div>';
+        groups.forEach(function(group, idx) {
+          // 渲染分隔线
+          if (group.sepLabel !== null && group.sepLabel !== undefined) {
+            var sepDiv = document.createElement('div');
+            if (group.sepLabel) {
+              sepDiv.innerHTML = '<div class="flex items-center gap-3 my-3"><span class="flex-1 border-t border-gray-300 dark:border-gray-600"></span><span class="text-xs text-gray-400 dark:text-gray-500 font-medium whitespace-nowrap px-1">' + group.sepLabel + '</span><span class="flex-1 border-t border-gray-300 dark:border-gray-600"></span></div>';
             } else {
-              div.innerHTML = '<hr class="my-3 border-gray-300 dark:border-gray-600">';
+              sepDiv.innerHTML = '<hr class="my-3 border-gray-300 dark:border-gray-600">';
             }
-            container.appendChild(div);
+            container.appendChild(sepDiv);
           }
 
           // 渲染该组的链接卡片
           if (group.items.length > 0) {
-            const linkSection = document.createElement('div');
+            var linkSection = document.createElement('div');
             linkSection.className = 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6 gap-6';
-            group.items.forEach(link => {
-              const card = createCard(link.title, link.url, link.icon);
+            group.items.forEach(function(link) {
+              var card = createCard(link.title, link.url, link.icon);
               linkSection.appendChild(card);
             });
             container.appendChild(linkSection);
           }
         });
+
+        // 如果没有任何分隔符，保持原有渲染方式（不分组的纯链接列表）
+        if (!hasSplit) {
+          // 上面已经渲染好了，不需要额外处理
+        }
       }
 
       // Update sidebar active state
