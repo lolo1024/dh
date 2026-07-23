@@ -131,22 +131,9 @@
   }
 }
 
-/* ── 6. Separator 分隔线区域修复 ─────────────────────────── */
+/* ── 6. 分隔线样式 ─────────────────────────────────────────── */
 
-/* 隐藏 separator.site/folder 类的异常卡片 */
-.grid > div:has(> a[href*="separator"]) {
-  display: none !important;
-}
-
-/* 或者用文本匹配隐藏 */
-.grid div:has(> p:-any-link):-has(> p:-only-of-type) {
-  /* separator 卡片的特征：只有一个 p 标签且内容含 separator */
-}
-
-/* 更精确地：隐藏包含 separator 文字的卡片 */
-.grid div[class*="rounded-lg"]:has(p:text-contains("separator")) {
-  display: none !important;
-}
+/* 分隔线保持可见，由 JS 控制渲染为分组分割线 */
 
 /* ── 7. 网格间距微调 ─────────────────────────────────────── */
 #bookmarks > .grid {
