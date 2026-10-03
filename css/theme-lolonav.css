@@ -152,9 +152,7 @@
 /* ── 8. 侧边栏导航项文字 ─────────────────────────────────── */
 /* 侧边栏容器：增加宽度 */
 nav.sidebar,
-#sidebar,
-aside[class*="sidebar"],
-[class*="sidebar"] {
+#sidebar {
   min-width: 200px !important;
   width: auto !important;
   max-width: 280px !important;
@@ -225,4 +223,80 @@ nav li span:not(:has(svg)),
 footer {
   font-size: 0.8rem !important;
   padding: 1rem 0 !important;
+}
+
+/* ── 11. 移动端顶栏：两行 + 全宽搜索框 ─────────────────────── */
+/* 背景：搜索框原本被包在 `hidden lg:block` 容器里（<1024px 直接 display:none），
+   而移动端顶栏没有任何替代搜索入口 ⇒ 手机上搜索功能整个消失。
+   这里在 <1024px 把顶栏改成两行：第一行 汉堡+logo+品牌+主题键，第二行 全宽搜索框。
+   复用同一个 #searchInput，回车/点按/清除逻辑自动生效，无需改 JS。
+   ⚠️ 用裸 CSS 覆盖，不要新增 Tailwind 工具类：css/tailwind.css 是预编译产物，本地没有构建源。 */
+@media (max-width: 1023.98px) {
+  /* 顶栏高度自适应 + 允许换行 */
+  #navHeader {
+    height: auto !important;
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+  }
+
+  #navHeader > div {
+    height: auto !important;
+    flex-wrap: wrap !important;
+    row-gap: 0.5rem !important;
+  }
+
+  /* 左侧簇（汉堡 + logo + 品牌）吃掉剩余宽度，把主题键顶到最右 */
+  #navHeader > div > div:first-child {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+  }
+
+  /* 搜索框：强制显示 + order 换到第二行 + 占满整行 */
+  #navHeader .nav-search {
+    display: flex !important;
+    order: 99 !important;
+    flex: 0 0 100% !important;
+    width: 100% !important;
+    height: 38px !important;
+    align-items: center !important;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #f9fafb;
+  }
+
+  .dark #navHeader .nav-search {
+    border-color: #374151;
+    background: #1f2937;
+  }
+
+  #navHeader .nav-search #searchInput {
+    width: 100% !important;
+    height: 100% !important;
+    background: transparent !important;
+  }
+
+  #navHeader .nav-search #clearSearchButton {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-right: 0 !important;
+  }
+}
+
+/* ── 12. 移动端抽屉导航（#navigation-mobile）───────────────── */
+#navigation-mobile li > div {
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+
+#navigation-mobile li a {
+  white-space: normal !important;
+  word-break: break-word !important;
+  line-height: 1.4 !important;
+}
+
+#navigation-mobile li {
+  min-width: 0 !important;
 }
